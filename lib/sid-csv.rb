@@ -29,8 +29,14 @@ module CSV::SID
       csv_line(sid_data, :description, "description"),
       *csv_lines(sid_data["dependency-revision"], :dependency,
                  "module-name", "module-revision"),
-      *csv_lines(sid_data["assignment-range"], :range, "entry-point", "size"),
-      *csv_lines(sid_data["item"], "sid", "namespace", "identifier", "status"),
+      *csv_lines(sid_data["assignment-range"] || (
+                   warn "** assignment-range missing!  Trying assignment-ranges."
+                   sid_data["assignment-ranges"]
+                 ), :range, "entry-point", "size"),
+      *csv_lines(sid_data["item"] || (
+                   warn "** item missing!  Trying items."
+                   sid_data["items"]
+                 ), "sid", "namespace", "identifier", "status"),
     ]
   end
 
@@ -78,7 +84,11 @@ module CSV::SID
   end
 
   def sid_data_from_file(text)
-    JSON.load(text)[SID_FILE_TOP_LEVEL]
+    outer = JSON.load(text)
+    outer[SID_FILE_TOP_LEVEL] || (
+      warn "** #{SID_FILE_TOP_LEVEL} missing!  Trying top-level itself."
+      outer
+    )
   end
 
   def json_dump(fn, value)
