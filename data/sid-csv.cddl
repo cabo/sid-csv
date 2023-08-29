@@ -1,0 +1,49 @@
+; header = absent
+
+SID-File = [meta-record,
+            ?description-record,
+            *dependency-record,
+            *range-record,
+            *item-record]
+
+meta-record = ["ietf-sid-file",
+               module-name: text,
+               module-revision: empty / text,
+               sid-file-revision: empty / text,
+               sid-file-status: empty / "unpublished" / "published"]
+
+description-record = ["description",
+                      description: empty / text]
+
+dependency-record = ["dependency",
+                     module-name: text,
+                     module-revision: text]
+
+range-record = ["range",
+                entry-point: uint,
+                size: uint]
+
+item-record = [; "item", -- useful to elide for bulk of file
+               sid: uint
+               (
+                 namespace: "module" / "identity" / "feature"
+                 identifier: yang-identifier
+                //
+                 namespace: "data"
+                 identifier: schema-node-path
+               )
+               status: empty / "stable" / "unstable" / "obsolete"]
+
+yang-identifier = text .abnf ("yang-identifier" .det id-abnf)
+schema-node-path = text .abnf ("schema-node-path" .det id-abnf)
+id-abnf = '
+  schema-node-path = "/" QID *( "/" OQID)
+  yang-identifier = ID
+  QID = ID ":" ID
+  OQID = ID [":" ID]
+  ID = I *C
+  I = "_" / %x41-5a / %x61-7a
+  C = I / %x30-39 / "-" / "."
+'
+
+empty = ""

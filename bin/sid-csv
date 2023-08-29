@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+require_relative '../lib/sid-csv.rb'
+include CSV::SID
+
+Encoding.default_external = Encoding::UTF_8
+require 'optparse'
+require 'ostruct'
+
+$options = OpenStruct.new
+begin
+  op = OptionParser.new do |opts|
+    opts.banner = "Usage: merge-patch orig patch"
+
+    opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+      $options.verbose = v
+    end
+    opts.on("-tFMT", "--to=FMT", [:sid, :csv], "Target format") do |v|
+      $options.target = v
+    end
+    opts.on("-fFMT", "--from=FMT", [:sid, :csv], "Source format") do |v|
+      $options.source = v
+    end
+    opts.on("-c", "--[no-]cddlcheck", "Perform CDDL check") do |v|
+      $options.cddlcheck = v
+    end
+  end
+  op.parse!
+rescue Exception => e
+  warn e
+  exit 1
+end
+
+if $options.cddlcheck
+  warn "** Can't check cddl yet."
+  exit 1
+end
+
+$options.target ||= :sid
+$options.source ||= :sid
+
+input = ARGF.read
+
+case [$options.source, $options.target]
+in [:sid, :csv]
+  sid_data = sid_data_from_file(input)
+  sid_csv_data = sid_csv_from_data(sid_data)
+  generated_csv1 = csv_generate(sid_csv_data)
+  puts generated_csv1
+in [:csv, :sid]
+  converted_csv2 = CSV.parse(input, nil_value: "", converters: :integer)
+  # File.write("ietf-system-csv-cddl.diag", `cddl ../data/sid-csv.cddl vp ietf-system-csv-2.json`)
+  sid2 = sid_file_from_csv(converted_csv2)
+  puts JSON.pretty_generate(sid2)
+in [src, trg]
+  warn "** Can't translate #{src} to #{trg} yet."
+  exit 1
+end
