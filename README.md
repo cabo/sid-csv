@@ -4,7 +4,7 @@ This little tool provides for conversion between [YANG-SID][core-sid]
 files as used by [YANG-CBOR][RFC9254] and corresponding human-readable
 CSV files.
 
-[![](https://badge.fury.io/rb/sid-csv.svg)](http://badge.fury.io/rb/sid-csv)
+[![Gem Version](https://badge.fury.io/rb/sid-csv.svg)](https://badge.fury.io/rb/sid-csv)
 
 [core-sid]: https://www.ietf.org/archive/id/draft-ietf-core-sid-20.html
 
